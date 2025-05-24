@@ -1,31 +1,10 @@
-/*
- * File             : pnmio.c                                                                                                                    
- * Description: I/O facilities for PBM, PGM, PPM (PNM) binary and ASCII images.
- * Author         : Nikolaos Kavvadias <nikolaos.kavvadias@gmail.com>                                
- * Copyright    : (C) Nikolaos Kavvadias 2012-2022
- * Website        : http://www.nkavvadias.com                                                        
- *                                                                                                                                                    
- * This file is part of libpnmio, and is distributed under the terms of the    
- * Modified BSD License.
- *
- * A copy of the Modified BSD License is included with this distribution 
- * in the file LICENSE.
- * libpnmio is free software: you can redistribute it and/or modify it under the
- * terms of the Modified BSD License. 
- * libpnmio is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the Modified BSD License for more details.
- * 
- * You should have received a copy of the Modified BSD License along with 
- * libpnmio. If not, see <http://www.gnu.org/licenses/>. 
- */
+#include "pnmio.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <math.h>
-#include "pnmio.h"
 
 #ifdef DEBUG
 # define debug_print(...) fprintf(stderr, __VA_ARGS__)
