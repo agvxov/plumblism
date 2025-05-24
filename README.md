@@ -27,6 +27,15 @@ For example, tile maps for simple purposes or rapid prototyping.
 ```c
 ```
 
+## Compiling
+* Plumblism has no dependencies
+* Plumblism is standard C99
+* a classic UNIX tool-chain is required
+
+Invoking `make` will produce both a static and dynamic library.
+
+You could also just copy the source files.
+
 ## Related work
 * [https://netpbm.sourceforge.net/doc/index.html](https://netpbm.sourceforge.net/doc/index.html) original proper implementation
 * [https://github.com/nkkav/libpnmio](https://github.com/nkkav/libpnmio) the implementation I wanted to use, then patch, but ended up rewritting
