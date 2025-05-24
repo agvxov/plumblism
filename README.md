@@ -3,7 +3,7 @@
 
 Plumblism is a PBMplus image file processing library in C.
 
-# Introduction to PBMplus
+## Introduction to PBMplus
 PBMplus is a family of closely related image file formats.
 Their core design is identical,
 they differ in either being ASCII/binary
@@ -23,6 +23,10 @@ For example, tile maps for simple purposes or rapid prototyping.
 > [!TIP]
 > GIMP supports PBMplus.
 
-# API
+## API
 ```c
 ```
+
+## Related work
+* [https://netpbm.sourceforge.net/doc/index.html](https://netpbm.sourceforge.net/doc/index.html) original proper implementation
+* [https://github.com/nkkav/libpnmio](https://github.com/nkkav/libpnmio) the implementation I wanted to use, then patch, but ended up rewritting
