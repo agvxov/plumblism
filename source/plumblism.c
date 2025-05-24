@@ -7,12 +7,6 @@
 #include <math.h>
 #include <stdbool.h>
 
-#ifdef DEBUG
-# define debug_print(...) fprintf(stderr, __VA_ARGS__)
-#else
-# define debug_print(...)
-#endif
-
 #define    MAXLINE          1024
 #define    LITTLE_ENDIAN   -1
 #define    BIG_ENDIAN       1
