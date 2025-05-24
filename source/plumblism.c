@@ -53,8 +53,7 @@ typedef enum {
 
 int get_pnm_type(FILE * f) {
     int pnm_type = 0;
-    char magic[MAXLINE];
-    char line[MAXLINE];
+    char magic[2];
 
     magic[0] = fgetc(f);
     magic[1] = fgetc(f);
@@ -173,6 +172,8 @@ int read_pbm_data(FILE * f, int * b, int is_ascii) {
     if (is_ascii) {
         state_t state = INITIAL;
         while ((c = fgetc(f)) != EOF) {
+          #pragma GCC diagnostic push
+          #pragma GCC diagnostic ignored "-Wswitch"
             switch (state) {
                 case INITIAL: {
                     switch (c) {
@@ -189,6 +190,7 @@ int read_pbm_data(FILE * f, int * b, int is_ascii) {
                     if (c == '\n') { BEGIN(INITIAL); }
                 } break;
             }
+          #pragma GCC diagnostic pop
         } 
     } else {
         while ((c = fgetc(f)) != EOF) {
@@ -211,6 +213,8 @@ int read_pgm_data(FILE * f, int * b, int is_ascii) {
     if (is_ascii) {
         state_t state = INITIAL;
         while ((c = fgetc(f)) != EOF) {
+          #pragma GCC diagnostic push
+          #pragma GCC diagnostic ignored "-Wswitch"
             switch (state) {
                 case INITIAL: {
                     switch (c) {
@@ -233,6 +237,7 @@ int read_pgm_data(FILE * f, int * b, int is_ascii) {
                     if (c == '\n') { BEGIN(INITIAL); }
                 } break;
             }
+          #pragma GCC diagnostic pop
         } 
     } else {
         while ((c = fgetc(f)) != EOF) {
@@ -252,6 +257,8 @@ int read_ppm_data(FILE *f, int * b, int is_ascii) {
     if (is_ascii) {
         state_t state = INITIAL;
         while ((c = fgetc(f)) != EOF) {
+          #pragma GCC diagnostic push
+          #pragma GCC diagnostic ignored "-Wswitch"
             switch (state) {
                 case INITIAL: {
                     switch (c) {
@@ -271,6 +278,7 @@ int read_ppm_data(FILE *f, int * b, int is_ascii) {
                     if (c == '\n') { BEGIN(INITIAL); }
                 } break;
             }
+          #pragma GCC diagnostic pop
         }
     } else {
         while (!feof(f)) {
@@ -282,6 +290,8 @@ int read_ppm_data(FILE *f, int * b, int is_ascii) {
 }
 
 int write_pbm_file(FILE * f, const int * b, int w, int h, int is_ascii) {
+    int r = 0;
+
     // Magic
     fputs(is_ascii ? "P1 " : "P4 ", f);
 
@@ -305,6 +315,8 @@ int write_pbm_file(FILE * f, const int * b, int w, int h, int is_ascii) {
             fputc('0' + v, f);
         }
     }
+
+    return r;
 }
 
 int write_pgm_file(FILE * f, const int * b, int w, int h, int intensity, int is_ascii) {
@@ -334,7 +346,7 @@ int write_pgm_file(FILE * f, const int * b, int w, int h, int intensity, int is_
 }
 
 int write_ppm_file(FILE * f, const int * b, int w, int h, int intensity, int is_ascii) {
-    int r = 0;
+    int r = 0; // XXX the return value is incorrect
 
     // Magic
     fputs(is_ascii ? "P3 " : "P6 ", f);
@@ -347,10 +359,11 @@ int write_ppm_file(FILE * f, const int * b, int w, int h, int intensity, int is_
         int b_i = 0;
         for (int i = 0; i < w*h; i++) {
             fprintf(f, "%d %d %d  ", 
-                b[b_i++], 
-                b[b_i++], 
-                b[b_i++]
+                b[b_i+1], 
+                b[b_i+2], 
+                b[b_i+3]
             );
+            b += 3;
             if ((i + 1) % w == 0) {
                 fprintf(f, "\n");
             }
@@ -360,6 +373,8 @@ int write_ppm_file(FILE * f, const int * b, int w, int h, int intensity, int is_
             fprintf(f, "%c", b[i]);
         }
     }
+
+    return r;
 }
 
 // ---
