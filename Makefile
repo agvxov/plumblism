@@ -1,6 +1,6 @@
 .PHONY: test
 
-CFLAGS := -std=c99 -Wall -Wpedantic -O2
+CFLAGS := -Isource/ -std=c99 -Wall -Wpedantic -O2
 
 main:
 	${CC} ${CFLAGS} -shared -fPIC source/plumblism.c -o object/libplumblism.so
