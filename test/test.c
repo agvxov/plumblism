@@ -28,7 +28,7 @@ signed main(void) {
 
     buffer[12] = 1;
 
-    FILE * f2 = fopen("test_out.pbm", "w");
+    FILE * f2 = fopen("test.out.pbm", "w");
 
     write_pnm_file(f2, buffer, w, h, 0, is_ascii);
 
