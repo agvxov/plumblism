@@ -24,8 +24,8 @@ For example, tile maps for simple purposes or rapid prototyping.
 > GIMP supports PBMplus.
 
 ## API
-```c
-```
+The [header file](source/plumblism.h) has been extensively commented.
+Consult it for documentation.
 
 ## Compiling
 * Plumblism has no dependencies
