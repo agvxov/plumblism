@@ -76,7 +76,7 @@ int get_pnm_type(FILE * f) {
     exit(1);
 }
 
-//static
+static
 int lex_header(FILE * f) {
     int r;
     char digit_buffer[12];
@@ -121,166 +121,153 @@ int lex_header(FILE * f) {
     return -1;
 }
 
-int read_pbm_header(FILE * f, int * w, int * h, int * is_ascii) {
-    char magic[2];
-
-    rewind(f);
-    magic[0] = fgetc(f);
-    magic[1] = fgetc(f);
-
-    if (w       ) { *w        = lex_header(f); if (*w == -1) { return -1; } }
-    if (h       ) { *h        = lex_header(f); if (*h == -1) { return -1; } }
-    if (is_ascii) { *is_ascii = magic[1] < '4';  }
-
-    if (*w == -1
-    ||  *h == -1) {
-        return 0;
-    }
-
-    return (*w) * (*h) * sizeof(int);
-}
-
-int read_pgm_header(FILE * f, int * w, int * h, int * intensity, int * is_ascii) {
-    char magic[2];
-
-    rewind(f);
-    magic[0] = fgetc(f);
-    magic[1] = fgetc(f);
-
-    if (w        ) { *w         = lex_header(f); if (*w         == -1) { return -1; } }
-    if (h        ) { *h         = lex_header(f); if (*h         == -1) { return -1; } }
-    if (intensity) { *intensity = lex_header(f); if (*intensity == -1) { return -1; } }
-    if (is_ascii ) { *is_ascii  = magic[1] % 2;  }
-
-    return (*w) * (*h) * sizeof(int);
-}
-
-int read_ppm_header(FILE * f, int * w, int * h, int * intensity, int * is_ascii) {
-    return read_pgm_header(f, w, h, intensity, is_ascii);
-}
-
-int read_pbm_data(FILE * f, int * b, int is_ascii) {
+static
+int lex_data(FILE * f, int * b) {
     int r = 0;
-    
+
     int c;
-    if (is_ascii) {
-        state_t state = INITIAL;
-        while ((c = fgetc(f)) != EOF) {
-          #pragma GCC diagnostic push
-          #pragma GCC diagnostic ignored "-Wswitch"
-            switch (state) {
-                case INITIAL: {
-                    switch (c) {
-                        case '0': case '1': {
-                            b[r++] = c - '0';
-                        } break;
-                        case WS: { ; } break;
-                        case '#': { BEGIN(IN_COMMENT); } break;
-                        default: return -1;
-                    }
-                } break;
-
-                case IN_COMMENT: {
-                    if (c == '\n') { BEGIN(INITIAL); }
-                } break;
-            }
-          #pragma GCC diagnostic pop
-        } 
-    } else {
-        while ((c = fgetc(f)) != EOF) {
-            for (int i = 0; i < 8; i++) {
-                b[r++] = (c >> (7-i)) & 0x1;
-            }
-        } 
-    }
-    
-    return r;
-}
-
-int read_pgm_data(FILE * f, int * b, int is_ascii) {
-    int r = 0;
-
+    state_t state = INITIAL;
     char digit_buffer[12];
     int digit_buffer_empty_top = 0;
-    
-    int c;
-    if (is_ascii) {
-        state_t state = INITIAL;
-        while ((c = fgetc(f)) != EOF) {
-          #pragma GCC diagnostic push
-          #pragma GCC diagnostic ignored "-Wswitch"
-            switch (state) {
-                case INITIAL: {
-                    switch (c) {
-                        case DIGIT: {
-                            digit_buffer[digit_buffer_empty_top++] = c;
-                        } break;
+    while ((c = fgetc(f)) != EOF) {
+      #pragma GCC diagnostic push
+      #pragma GCC diagnostic ignored "-Wswitch"
+        switch (state) {
+            case INITIAL: {
+                switch (c) {
+                    case DIGIT: {
+                        digit_buffer[digit_buffer_empty_top++] = c;
+                    } break;
 
-                        case WS: {
-                            int i;
-                            DIGIT_BUFFER_TO_INT(digit_buffer, digit_buffer_empty_top, i);
-                            b[r++] = i;
-                        } break;
+                    case WS: {
+                        int i;
+                        DIGIT_BUFFER_TO_INT(digit_buffer, digit_buffer_empty_top, i);
+                        b[r++] = i;
+                    } break;
 
-                        case '#': { BEGIN(IN_COMMENT); } break;
+                    case '#': { BEGIN(IN_COMMENT); } break;
 
-                        default: return -1;
-                    }
-                } break;
-                case IN_COMMENT: {
-                    if (c == '\n') { BEGIN(INITIAL); }
-                } break;
-            }
-          #pragma GCC diagnostic pop
-        } 
-    } else {
-        while ((c = fgetc(f)) != EOF) {
-            b[r++] = c;
-        } 
+                    default: return -1;
+                }
+            } break;
+            case IN_COMMENT: {
+                if (c == '\n') { BEGIN(INITIAL); }
+            } break;
+        }
+      #pragma GCC diagnostic pop
     }
 
     return r;
 }
 
-int read_ppm_data(FILE *f, int * b, int is_ascii) {
-    int b_i = 0;
-    char digit_buffer[12];
-    int digit_buffer_empty_top = 0;
+int read_pnm_header(FILE * f, int * w, int * h, int * intensity, int * is_ascii, const int type) {
+    char magic[2];
+    int w_, h_, intensity_, is_ascii_;
+
+    rewind(f);
+    magic[0] = fgetc(f);
+    magic[1] = fgetc(f);
+
+    w_ = lex_header(f); if (w_ == -1) { return -1; }
+    h_ = lex_header(f); if (h_ == -1) { return -1; }
+    if (type == PNM_BIT_ASCII
+    ||  type == PNM_BIT_BINARY) {
+        intensity_ = 1;
+    } else {
+        intensity_ = lex_header(f);
+        if (intensity_ == -1) { return -1; }
+    }
+    is_ascii_ = magic[1] < '4';
+
+    if (w        ) { *w         = w_        ; }
+    if (h        ) { *h         = h_        ; }
+    if (intensity) { *intensity = intensity_; }
+    if (is_ascii ) { *is_ascii  = is_ascii_ ; }
+
+    return (*w) * (*h) * sizeof(int);
+}
+
+static
+int read_pnm_bit_ascii_data(FILE * f, int * b) {
+    int r = 0;
+
+    int c;
+    state_t state = INITIAL;
+    while ((c = fgetc(f)) != EOF) {
+      #pragma GCC diagnostic push
+      #pragma GCC diagnostic ignored "-Wswitch"
+        switch (state) {
+            case INITIAL: {
+                switch (c) {
+                    case '0': case '1': {
+                        b[r++] = c - '0';
+                    } break;
+                    case WS: { ; } break;
+                    case '#': { BEGIN(IN_COMMENT); } break;
+                    default: return -1;
+                }
+            } break;
+
+            case IN_COMMENT: {
+                if (c == '\n') { BEGIN(INITIAL); }
+            } break;
+        }
+      #pragma GCC diagnostic pop
+    }
+
+    return r;
+}
+
+static
+int read_pnm_bit_binary_data(FILE * f, int * b) {
+    int r = 0;
     
     int c;
-    if (is_ascii) {
-        state_t state = INITIAL;
-        while ((c = fgetc(f)) != EOF) {
-          #pragma GCC diagnostic push
-          #pragma GCC diagnostic ignored "-Wswitch"
-            switch (state) {
-                case INITIAL: {
-                    switch (c) {
-                        case DIGIT: {
-                            digit_buffer[digit_buffer_empty_top++] = c;
-                        } break;
-                        case WS: {
-                            int i;
-                            DIGIT_BUFFER_TO_INT(digit_buffer, digit_buffer_empty_top, i);
-                            b[b_i++] = i;
-                        } break;
-                        case '#': { BEGIN(IN_COMMENT); } break;
-                        default: return -1;
-                    }
-                } break;
-                case IN_COMMENT: {
-                    if (c == '\n') { BEGIN(INITIAL); }
-                } break;
-            }
-          #pragma GCC diagnostic pop
-        }
-    } else {
-        while (!feof(f)) {
-            b[b_i++] = fgetc(f);
+    while ((c = fgetc(f)) != EOF) {
+        for (int i = 0; i < 8; i++) {
+            b[r++] = (c >> (7-i)) & 0x1;
         }
     }
 
-    return (b_i % 3 == 0 ? b_i : -1);
+    return r;
+}
+
+static
+int read_pnm_gray_ascii_data(FILE * f, int * b) {
+    return lex_data(f, b);
+}
+
+static inline
+int read_pnm_gray_binary_data(FILE * f, int * b) {
+    int r = 0;
+
+    while (!feof(f)) { b[r++] = fgetc(f); }
+
+    return r;
+}
+
+static
+int read_pnm_pix_ascii_data(FILE * f, int * b) {
+    const int i = lex_data(f, b);
+    return (i % 3 == 0 ? i : -1);
+}
+
+static
+int read_pnm_pix_binary_data(FILE * f, int * b) {
+    return read_pnm_gray_binary_data(f, b);
+}
+
+int read_pnm_data(FILE * f, int * b, int type) {
+    switch (type) {
+        case PNM_BIT_ASCII:  return read_pnm_bit_ascii_data(f, b);
+        case PNM_BIT_BINARY: return read_pnm_bit_binary_data(f, b);
+        case PNM_GRE_ASCII:  return read_pnm_gray_ascii_data(f, b);
+        case PNM_GRE_BINARY: return read_pnm_gray_binary_data(f, b);
+        case PNM_PIX_ASCII:  return read_pnm_pix_ascii_data(f, b);
+        case PNM_PIX_BINARY: return read_pnm_pix_binary_data(f, b);
+    }
+
+    return -1;
 }
 
 int write_pbm_file(FILE * f, const int * b, int w, int h, int is_ascii) {

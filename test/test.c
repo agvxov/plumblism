@@ -12,13 +12,13 @@ signed main(void) {
     if (!f) { return 1; }
 
     int w, h, is_ascii;
-    e = read_pbm_header(f, &w, &h, &is_ascii);
+    e = read_pnm_header(f, &w, &h, &is_ascii, NULL, PNM_BIT_ASCII);
 
     if (e == -1) { return 1; }
 
     int * buffer = (int*)malloc(e * sizeof(int));
 
-    e = read_pbm_data(f, buffer, is_ascii);
+    e = read_pnm_data(f, buffer, PNM_BIT_ASCII);
     if (e < w*h) { return 1; }
 
     for (int i = 0; i < w*h; i++) {

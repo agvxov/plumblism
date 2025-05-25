@@ -1,34 +1,16 @@
-/*
- * File       : pnmio.h                                                        
- * Description: Header file for pnmio.c.
- * Author     : Nikolaos Kavvadias <nikolaos.kavvadias@gmail.com>                
- * Copyright  : (C) Nikolaos Kavvadias 2012-2022
- * Website    : http://www.nkavvadias.com                            
- *                                                                          
- * This file is part of libpnmio, and is distributed under the terms of the  
- * Modified BSD License.
- *
- * A copy of the Modified BSD License is included with this distribution 
- * in the file LICENSE.
- * libpnmio is free software: you can redistribute it and/or modify it under the
- * terms of the Modified BSD License. 
- * libpnmio is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the Modified BSD License for more details.
- * 
- * You should have received a copy of the Modified BSD License along with 
- * libpnmio. If not, see <http://www.gnu.org/licenses/>. 
- */
- 
-#ifndef PNMIO_H
-#define PNMIO_H
+#ifndef PLUMBLISM_H
+#define PLUMBLISM_H
 
 #include <stdio.h>
 
 /* Legend:
- *  PBM -> Protable Bit Map
- *  PGM -> Protable Grey Map
- *  PPM -> Protable Pix Map
+ *  PBM -> Portable Bit Map
+ *  PGM -> Portable Grey Map
+ *  PPM -> Portable Pix Map
+ *
+ *  PBMplus -> PBM, PGM and PPM
+ *  PNM -> Portable Any Map; synonym for PBMplus,
+ *          I have no clue who came up with it
  */
 
 enum {
@@ -44,25 +26,33 @@ enum {
     PFM_GREYSCALE = 17, /* f */
 };
 
+enum {
+    PNM_BIT_ASCII  = 1,
+    PNM_BIT_BINARY,
+    PNM_GRE_ASCII,
+    PNM_GRE_BINARY,
+    PNM_PIX_ASCII,
+    PNM_PIX_BINARY,
+};
+
 #define IS_BIGENDIAN(x)   ((*(char*)&x) == 0)
 #define IS_LITTLE_ENDIAN  (1 == *(unsigned char *)&(const int){1})
 
-/* PNM/PFM API. */
-int get_pnm_type(FILE *f);
+/* PNM API */
+int get_pnm_type(FILE * f);
 
-int read_pbm_header(FILE * f, int * w, int * h, int * is_ascii);
-int read_pgm_header(FILE * f, int * w, int * h, int * intensity, int *is_ascii);
-int read_ppm_header(FILE * f, int * w, int * h, int * intensity, int *is_ascii);
-int read_pfm_header(FILE * f, int * w, int * h, int * img_type, int *endianess);
+// XXX is_ascii makes no sense
+int read_pnm_header(FILE * f, int * w, int * h, int * intensity, int * is_ascii, int type);
 
-int read_pbm_data(FILE * f, int * b, int is_ascii);
-int read_pgm_data(FILE * f, int * b, int is_ascii);
-int read_ppm_data(FILE * f, int * b, int is_ascii);
-int read_pfm_data(FILE * f, float *img_in, int img_type, int endianess);
+int read_pnm_data(FILE * f, int * b, int type);
 
 int write_pbm_file(FILE * f, const int * b, int w, int h, int is_ascii);
 int write_pgm_file(FILE * f, const int * b, int w, int h, int intensity, int is_ascii);
 int write_ppm_file(FILE * f, const int * b, int w, int h, int intensity, int is_ascii);
+
+/* PFM API */
+int read_pfm_header(FILE * f, int * w, int * h, int * img_type, int * endianess);
+int read_pfm_data(FILE * f, float *img_in, int img_type, int endianess);
 int write_pfm_file(FILE * f, float *img_out, int x_size, int y_size, int img_type, int endianess);
 
 #endif
