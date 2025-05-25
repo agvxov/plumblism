@@ -31,7 +31,7 @@ typedef enum {
 //  Does this yield 10-10 or 1010?
 //  We dont know!
 
-int get_pnm_type(FILE * f) {
+pnm_type_t get_pnm_type(FILE * f) {
     char magic[2];
 
     magic[0] = fgetc(f);
@@ -129,7 +129,7 @@ int lex_data(FILE * f, int * b) {
 
 
 // --- Readers
-int read_pnm_header(FILE * f, int * w, int * h, int * intensity, const int type) {
+int read_pnm_header(FILE * f, pnm_type_t type, int * w, int * h, int * intensity) {
     int w_, h_, intensity_;
 
     rewind(f);
@@ -223,7 +223,7 @@ int read_pnm_pix_binary_data(FILE * f, int * b) {
     return read_pnm_gray_binary_data(f, b);
 }
 
-int read_pnm_data(FILE * f, int * b, int type) {
+int read_pnm_data(FILE * f, pnm_type_t type, int * b) {
     switch (type) {
         case PNM_BIT_ASCII:  return read_pnm_bit_ascii_data(f, b);
         case PNM_GRE_ASCII:  return read_pnm_gray_ascii_data(f, b);
@@ -305,7 +305,7 @@ int write_pnm_pix_binary_data(FILE * f, const int * b, int w, int h) {
     return write_pnm_gray_binary_data(f, b, w*3, h);
 }
 
-int write_pnm_file(FILE * f, const int * b, int w, int h, int intensity, int type) {
+int write_pnm_file(FILE * f, pnm_type_t type, const int * b, int w, int h, int intensity) {
     int r = 0;
 
     char magic[] = "PX";

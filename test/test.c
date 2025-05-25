@@ -11,13 +11,13 @@ signed main(void) {
     if (!f) { return 1; }
 
     int w, h;
-    e = read_pnm_header(f, &w, &h, NULL, PNM_BIT_ASCII);
+    e = read_pnm_header(f, PNM_BIT_ASCII, &w, &h, NULL);
 
     if (e == -1) { return 1; }
 
     int * buffer = (int*)malloc(e * sizeof(int));
 
-    e = read_pnm_data(f, buffer, PNM_BIT_ASCII);
+    e = read_pnm_data(f, PNM_BIT_ASCII, buffer);
     if (e < w*h) { return 1; }
 
     for (int i = 0; i < w*h; i++) {
@@ -29,7 +29,7 @@ signed main(void) {
 
     FILE * f2 = fopen("test.out.pbm", "w");
 
-    write_pnm_file(f2, buffer, w, h, 0, PNM_BIT_ASCII);
+    write_pnm_file(f2, PNM_BIT_ASCII, buffer, w, h, 0);
 
     fclose(f);
     fclose(f2);
