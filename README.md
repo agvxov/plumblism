@@ -14,7 +14,7 @@ It is safe to say that PBMplus has the simplest structure imaginable.
 Put simply, they are arrays of color values.
 No compression, no color tables, no whatever the hell is BMP is doing.
 If you would like to learn the exacts,
-consult [documentation/PBMplus\_-\_Overview.html](the specification).
+consult [documentation/PBMplus_-_Overview.html](the specification).
 
 While the original use case has been long deprecated (email attachments),
 due to its simplicity, the format remains useful.
