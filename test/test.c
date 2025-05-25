@@ -1,5 +1,5 @@
-// @BAKE gcc -o $*.out $@ source/pnmio.c -ldictate -std=c23 -ggdb
-#include "source/pnmio.h"
+
+#include <plumblism.h>
 #include <dictate.h>
 #include <stdlib.h>
 
@@ -8,7 +8,8 @@ extern int lex_header(FILE * f);
 signed main(void) {
     int e;
     //FILE * f = fopen("/home/anon/Documents/figure_1.pbm", "r");
-    FILE * f = fopen("test.pbm", "r");
+    FILE * f = fopen("test/test.pbm", "r");
+    if (!f) { return 1; }
 
     int w, h, is_ascii;
     e = read_pbm_header(f, &w, &h, &is_ascii);
