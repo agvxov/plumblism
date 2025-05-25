@@ -10,6 +10,7 @@ main:
 test:
 	${CC} -o test.out test/test.c source/plumblism.c -Isource -ldictate -std=c23 -ggdb -fsanitize=address
 	./test.out
+	cat test.out.pbm
 
 man:
 	ts-md2man documentation/netpbm.5.md > object/netpbm.3

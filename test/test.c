@@ -1,4 +1,3 @@
-
 #include <plumblism.h>
 #include <dictate.h>
 #include <stdlib.h>
@@ -11,8 +10,8 @@ signed main(void) {
     FILE * f = fopen("test/test.pbm", "r");
     if (!f) { return 1; }
 
-    int w, h, is_ascii;
-    e = read_pnm_header(f, &w, &h, &is_ascii, NULL, PNM_BIT_ASCII);
+    int w, h;
+    e = read_pnm_header(f, &w, &h, NULL, PNM_BIT_ASCII);
 
     if (e == -1) { return 1; }
 
@@ -30,7 +29,7 @@ signed main(void) {
 
     FILE * f2 = fopen("test.out.pbm", "w");
 
-    write_pnm_file(f2, buffer, w, h, 0, is_ascii);
+    write_pnm_file(f2, buffer, w, h, 0, PNM_BIT_ASCII);
 
     fclose(f);
     fclose(f2);

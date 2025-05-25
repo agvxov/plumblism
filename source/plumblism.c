@@ -1,21 +1,7 @@
 #include "plumblism.h"
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <string.h>
-#include <math.h>
 #include <stdbool.h>
-
-#define    MAXLINE          1024
-#define    LITTLE_ENDIAN   -1
-#define    BIG_ENDIAN       1
-#define    GREYSCALE_TYPE   0 /* used for PFM */
-#define    RGB_TYPE         1 /* used for PFM */     
-
-static inline int ReadFloat(FILE *fptr, float *f, int swap);
-static inline int WriteFloat(FILE *fptr, float *f, int swap);
-static inline int floatEqualComparison(float A, float B, float maxRelDiff);
 
 /* Every problem is a parsing problem, if you hate yourself enough.
  *                                      - Anon; all rights reserved
@@ -32,9 +18,9 @@ typedef enum {
 #define WS    ' ': case '\t': case '\n': case '\v': case '\f': case '\r'
 #define BEGIN(s) state = s
 #define DIGIT_BUFFER_TO_INT(b, n, r) \
-  r = 0;                                       \
-  for (int i = 0; i < n; i++) { \
-      r = r * 10 + (b[i] - '0');          \
+  r = 0;                             \
+  for (int i = 0; i < n; i++) {      \
+      r = r * 10 + (b[i] - '0');     \
   }
 
 
@@ -46,36 +32,17 @@ typedef enum {
 //  We dont know!
 
 int get_pnm_type(FILE * f) {
-    int pnm_type = 0;
     char magic[2];
 
     magic[0] = fgetc(f);
     magic[1] = fgetc(f);
  
-    if (magic[0] != 'P') { goto error; }
+    if (magic[0] != 'P') { return -1; }
 
-    // XXX: cant we just change the enum values?
-    // alternatively, i could use a perfect has function.
-    switch (magic[1]) {
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7': pnm_type = magic[1] - '1'; break;
-        case 'F': pnm_type = PFM_RGB       ; break;
-        case 'f': pnm_type = PFM_GREYSCALE ; break;
-        default: goto error;
-    }
-
-    return pnm_type;
-
- error:
-    fprintf(stderr, "Error: Unknown PNM/PFM file; wrong magic number!\n");
-    exit(1);
+    return magic[1] - '1';
 }
 
+// --- Lexers
 static
 int lex_header(FILE * f) {
     int r;
@@ -160,13 +127,14 @@ int lex_data(FILE * f, int * b) {
     return r;
 }
 
-int read_pnm_header(FILE * f, int * w, int * h, int * intensity, int * is_ascii, const int type) {
-    char magic[2];
-    int w_, h_, intensity_, is_ascii_;
+
+// --- Readers
+int read_pnm_header(FILE * f, int * w, int * h, int * intensity, const int type) {
+    int w_, h_, intensity_;
 
     rewind(f);
-    magic[0] = fgetc(f);
-    magic[1] = fgetc(f);
+    fgetc(f);
+    fgetc(f);
 
     w_ = lex_header(f); if (w_ == -1) { return -1; }
     h_ = lex_header(f); if (h_ == -1) { return -1; }
@@ -177,12 +145,10 @@ int read_pnm_header(FILE * f, int * w, int * h, int * intensity, int * is_ascii,
         intensity_ = lex_header(f);
         if (intensity_ == -1) { return -1; }
     }
-    is_ascii_ = magic[1] < '4';
 
     if (w        ) { *w         = w_        ; }
     if (h        ) { *h         = h_        ; }
     if (intensity) { *intensity = intensity_; }
-    if (is_ascii ) { *is_ascii  = is_ascii_ ; }
 
     return (*w) * (*h) * sizeof(int);
 }
@@ -270,6 +236,8 @@ int read_pnm_data(FILE * f, int * b, int type) {
     return -1;
 }
 
+
+// --- Writers
 static
 int write_pnm_bit_ascii_data(FILE * f, const int * b, int w, int h) {
     int r = 0;
@@ -346,229 +314,19 @@ int write_pnm_file(FILE * f, const int * b, int w, int h, int intensity, int typ
 
     if (type == PNM_BIT_ASCII
     ||  type == PNM_BIT_BINARY) {
-        r += fprintf(f, "%d %d\n", w, h);
+        r += fprintf(f, "\n%d %d\n", w, h);
     } else {
-        r += fprintf(f, "%d %d %d\n", w, h, intensity);
+        r += fprintf(f, "\n%d %d %d\n", w, h, intensity);
     }
 
     switch (type) {
-        case PNM_BIT_ASCII:  r += write_pnm_bit_ascii_data   (f, b, w, h);
-        case PNM_GRE_ASCII:  r += write_pnm_gray_ascii_data  (f, b, w, h);
-        case PNM_PIX_ASCII:  r += write_pnm_pix_ascii_data   (f, b, w, h);
-        case PNM_BIT_BINARY: r += write_pnm_bit_binary_data  (f, b, w, h);
-        case PNM_GRE_BINARY: r += write_pnm_gray_binary_data (f, b, w, h);
-        case PNM_PIX_BINARY: r += write_pnm_pix_binary_data  (f, b, w, h);
+        case PNM_BIT_ASCII:  r += write_pnm_bit_ascii_data   (f, b, w, h); break;
+        case PNM_GRE_ASCII:  r += write_pnm_gray_ascii_data  (f, b, w, h); break;
+        case PNM_PIX_ASCII:  r += write_pnm_pix_ascii_data   (f, b, w, h); break;
+        case PNM_BIT_BINARY: r += write_pnm_bit_binary_data  (f, b, w, h); break;
+        case PNM_GRE_BINARY: r += write_pnm_gray_binary_data (f, b, w, h); break;
+        case PNM_PIX_BINARY: r += write_pnm_pix_binary_data  (f, b, w, h); break;
     }
 
     return r;
-}
-
-// ---
-int write_pfm_file(FILE *f, float *img_out,
-    int x_size, int y_size, 
-    int img_type, int endianess) {
-    int i, j, x_scaled_size, y_scaled_size;
-    int swap = (endianess == 1) ? 0 : 1;
-    float fendian = (endianess == 1) ? +1.0 : -1.0;
-    
-    x_scaled_size = x_size;
-    y_scaled_size = y_size;
-
-    /* Write the magic number string. */
-    if (img_type == RGB_TYPE) {
-        fprintf(f, "PF\n");
-    } else if (img_type == GREYSCALE_TYPE) {
-        fprintf(f, "Pf\n");
-    } else {
-        fprintf(stderr, "Error: Image type invalid for PFM format!\n");
-        exit(1);        
-    }
-    /* Write the image dimensions. */
-    fprintf(f, "%d %d\n", x_scaled_size, y_scaled_size);
-    /* Write the endianess/scale factor as float. */
-    fprintf(f, "%f\n", fendian);
-    
-    /* Write the image data. */
-    for (i = 0; i < y_scaled_size; i++) {
-        for (j = 0; j < x_scaled_size; j++) {
-            if (img_type == RGB_TYPE) {
-                WriteFloat(f, &img_out[3*(i*x_scaled_size+j)+0], swap);
-                WriteFloat(f, &img_out[3*(i*x_scaled_size+j)+1], swap);
-                WriteFloat(f, &img_out[3*(i*x_scaled_size+j)+2], swap);
-            } else if (img_type == GREYSCALE_TYPE) {
-                WriteFloat(f, &img_out[i*x_scaled_size+j], swap);
-            }
-        }
-    }    
-}
-
-/* ReadFloat:
- * Read a possibly byte swapped floating-point number.
- * NOTE: Assume IEEE format.
- * Source: http://paulbourke.net/dataformats/pbmhdr/
- */
-static inline
-int ReadFloat(FILE *fptr, float *f, int swap) {
-    unsigned char *cptr;
-
-    if (fread(f, sizeof(float), 1, fptr) != 1) {
-        return (false);
-    }     
-    if (swap) {
-        cptr        = (unsigned char *)f;
-        unsigned char tmp = cptr[0];
-        cptr[0] = cptr[3];
-        cptr[3] = tmp;
-        tmp         = cptr[1];
-        cptr[1] = cptr[2];
-        cptr[2] = tmp;
-    }
-    return (true);
-}
-
-/* WriteFloat:
- * Write a possibly byte-swapped floating-point number.
- * NOTE: Assume IEEE format.
- */
-static inline
-int WriteFloat(FILE *fptr, float *f, int swap) {
-    unsigned char *cptr;
-
-    if (swap) {
-        cptr        = (unsigned char*)f;
-        unsigned char tmp = cptr[0];
-        cptr[0] = cptr[3];
-        cptr[3] = tmp;
-        tmp         = cptr[1];
-        cptr[1] = cptr[2];
-        cptr[2] = tmp;
-    }
-    if (fwrite(f, sizeof(float), 1, fptr) != 1) {
-        return (false);
-    }    
-    return (true); 
-}
-
-/* floatEqualComparison: 
- * Compare two floats and accept equality if not different than
- * maxRelDiff (a specified maximum relative difference).
- */
-static inline
-int floatEqualComparison(float A, float B, float maxRelDiff) {
-    float largest, diff = fabs(A-B);
-    A = fabs(A);
-    B = fabs(B);
-    largest = (B > A) ? B : A;
-    return (diff <= largest * maxRelDiff);
-}
-
-/* read_pfm_header:
- * Read the header contents of a PFM (portable float map) file.
- * Returns the number of bytes that need be allocated for the image data.
- * A PFM image file follows the format:
- * [PF|Pf]
- * <X> <Y> 
- * (endianess) {R1}{G1}{B1} ... {RMAX}{GMAX}{BMAX} 
- * NOTE1: Comment lines, if allowed, start with '#'.
- # NOTE2: < > denote integer values (in decimal).
- # NOTE3: ( ) denote floating-point values (in decimal).
- # NOTE4: { } denote floating-point values (coded in binary).
- */
-int read_pfm_header(FILE *f, int *img_xdim, int *img_ydim, int *img_type, int *endianess) {
-    int x_val, y_val;
-    unsigned int i;
-    int is_rgb=0, is_greyscale=0;
-    float aspect_ratio=0;
-    char magic[MAXLINE];
-    char line[MAXLINE];
-    int count=0;
-    int num_bytes=0;
-
-    /* Read the PFM file header. */
-    while (fgets(line, MAXLINE, f) != NULL) {
-        int flag = 0;
-        for (i = 0; i < strlen(line); i++) {
-            if (isgraph(line[i]) && (flag == 0)) {
-                if ((line[i] == '#') && (flag == 0)) {
-                    flag = 1;
-                }
-            }
-        }
-        if (flag == 0) {
-            if (count == 0) {
-                count += sscanf(line, "%2s %d %d %f", magic, &x_val, &y_val, &aspect_ratio);
-            } else if (count == 1) {
-                count += sscanf(line, "%d %d %f", &x_val, &y_val, &aspect_ratio);
-            } else if (count == 2) {
-                count += sscanf(line, "%d %f", &y_val, &aspect_ratio);
-            } else if (count == 3) {
-                count += sscanf(line, "%f", &aspect_ratio);
-            }
-        }
-        if (count == 4) {
-            break;
-        }
-    }
-
-    if (strcmp(magic, "PF") == 0) {
-        is_rgb             = 1;
-        is_greyscale = 0;
-    } else if (strcmp(magic, "Pf") == 0) {
-        is_greyscale = 0;
-        is_rgb             = 1;        
-    } else {
-        fprintf(stderr, "Error: Input file not in PFM format!\n");
-        exit(1);
-    }            
-
-    fprintf(stderr, "Info: magic=%s, x_val=%d, y_val=%d, aspect_ratio=%f\n",
-        magic, x_val, y_val, aspect_ratio);
-
-    /* FIXME: Aspect ratio different to 1.0 is not yet supported. */
-    if (!floatEqualComparison(aspect_ratio, -1.0, 1E-06) &&
-            !floatEqualComparison(aspect_ratio, 1.0, 1E-06)) {
-        fprintf(stderr, "Error: Aspect ratio different to -1.0 or +1.0 is unsupported!\n");
-        exit(1);
-    }
-
-    *img_xdim     = x_val;
-    *img_ydim     = y_val;
-    *img_type     = is_rgb & ~is_greyscale;
-    if (aspect_ratio > 0.0) {
-        *endianess = 1;
-    } else {
-        *endianess = -1;
-    }
-
-    num_bytes = *img_xdim * *img_ydim * sizeof(float);
-    if (is_rgb) {
-        num_bytes *= 3;
-    }
-    return num_bytes;
-}
-
-/* read_pfm_data:
- * Read the data contents of a PFM (portable float map) file.
- */
-int read_pfm_data(FILE *f, float *img_in, int img_type, int endianess) {
-    int i=0, c;
-    int swap = (endianess == 1) ? 0 : 1;
-    float r_val, g_val, b_val;
-        
-    /* Read the rest of the PFM file. */
-    while ((c = fgetc(f)) != EOF) {
-        ungetc(c, f);     
-        /* Read a possibly byte-swapped float. */
-        if (img_type == RGB_TYPE) {
-            ReadFloat(f, &r_val, swap);
-            ReadFloat(f, &g_val, swap);
-            ReadFloat(f, &b_val, swap); 
-            img_in[i++] = r_val;
-            img_in[i++] = g_val;
-            img_in[i++] = b_val;
-        } else if (img_type == GREYSCALE_TYPE) {
-            ReadFloat(f, &g_val, swap);
-            img_in[i++] = g_val;
-        }
-    }
 }
