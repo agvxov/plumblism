@@ -260,99 +260,104 @@ int read_pnm_pix_binary_data(FILE * f, int * b) {
 int read_pnm_data(FILE * f, int * b, int type) {
     switch (type) {
         case PNM_BIT_ASCII:  return read_pnm_bit_ascii_data(f, b);
-        case PNM_BIT_BINARY: return read_pnm_bit_binary_data(f, b);
         case PNM_GRE_ASCII:  return read_pnm_gray_ascii_data(f, b);
-        case PNM_GRE_BINARY: return read_pnm_gray_binary_data(f, b);
         case PNM_PIX_ASCII:  return read_pnm_pix_ascii_data(f, b);
+        case PNM_BIT_BINARY: return read_pnm_bit_binary_data(f, b);
+        case PNM_GRE_BINARY: return read_pnm_gray_binary_data(f, b);
         case PNM_PIX_BINARY: return read_pnm_pix_binary_data(f, b);
     }
 
     return -1;
 }
 
-int write_pbm_file(FILE * f, const int * b, int w, int h, int is_ascii) {
+static
+int write_pnm_bit_ascii_data(FILE * f, const int * b, int w, int h) {
     int r = 0;
 
-    // Magic
-    fputs(is_ascii ? "P1 " : "P4 ", f);
-
-    // Header
-    fprintf(f, "%d %d\n", w, h);
-    
-    // Data
-    if (is_ascii) {
-        for (int i = 0; i < w*h; i++) {
-            fprintf(f, "%d", b[i]);
-            if ((i + 1) % w == 0) {
-                fputc('\n', f);
-            }
-        }
-    } else {
-        for (int i = 0; i < w*h; i++) {
-            int v = 0;
-            for (int h = 0; h < 8; h++) {
-                v |= (b[i] << (7-h));
-            }
-            fputc('0' + v, f);
+    for (int i = 0; i < w*h; i++) {
+        r += fprintf(f, "%d", b[i]);
+        if ((i + 1) % w == 0) {
+            r += fputc('\n', f);
         }
     }
 
     return r;
 }
 
-int write_pgm_file(FILE * f, const int * b, int w, int h, int intensity, int is_ascii) {
+static
+int write_pnm_bit_binary_data(FILE * f, const int * b, int w, int h) {
     int r = 0;
 
-    // Magic
-    fputs(is_ascii ? "P2 " : "P5 ", f);
-
-    // Header
-    fprintf(f, "%d %d %d\n", w, h, intensity);
-    
-    // Data
-    if (is_ascii) {
-        for (int i = 0; i < w*h; i++) {
-            fprintf(f, "%d ", b[i]);
-            if ((i + 1) % w == 0) {
-                fputc('\n', f);
-            }
+    for (int i = 0; i < w*h; i++) {
+        int v = 0;
+        for (int h = 0; h < 8; h++) {
+            v |= (b[i] << (7-h));
         }
-    } else {
-        for (int i = 0; i < w*h; i++) {
-            fprintf(f, "%c", b[i]);
+        r += fputc('0' + v, f);
+    }
+
+    return 1;
+}
+
+static
+int write_pnm_gray_ascii_data(FILE * f, const int * b, int w, int h) {
+    return write_pnm_bit_ascii_data(f, b, w, h);
+}
+
+static
+int write_pnm_gray_binary_data(FILE * f, const int * b, int w, int h) {
+    int r = 0;
+
+    for (int i = 0; i < w*h; i++) { r += fprintf(f, "%c", b[i]); }
+
+    return r;
+}
+
+static
+int write_pnm_pix_ascii_data(FILE * f, const int * b, int w, int h) {
+    int r = 0;
+
+    for (int i = 0; i < w*h; i++) {
+        r += fprintf(f, "%d %d %d  ", 
+            b[0], 
+            b[1], 
+            b[2]
+        );
+        b += 3;
+        if ((i + 1) % w == 0) {
+            fprintf(f, "\n");
         }
     }
 
     return r;
 }
 
-int write_ppm_file(FILE * f, const int * b, int w, int h, int intensity, int is_ascii) {
-    int r = 0; // XXX the return value is incorrect
+static
+int write_pnm_pix_binary_data(FILE * f, const int * b, int w, int h) {
+    return write_pnm_gray_binary_data(f, b, w*3, h);
+}
 
-    // Magic
-    fputs(is_ascii ? "P3 " : "P6 ", f);
+int write_pnm_file(FILE * f, const int * b, int w, int h, int intensity, int type) {
+    int r = 0;
 
-    // Header
-    fprintf(f, "%d %d %d\n", w, h, intensity);
+    char magic[] = "PX";
+    magic[1] = '0' + type;
+    r += fputs(magic, f);
 
-    // Data
-    if (is_ascii) {
-        int b_i = 0;
-        for (int i = 0; i < w*h; i++) {
-            fprintf(f, "%d %d %d  ", 
-                b[b_i+1], 
-                b[b_i+2], 
-                b[b_i+3]
-            );
-            b += 3;
-            if ((i + 1) % w == 0) {
-                fprintf(f, "\n");
-            }
-        }
+    if (type == PNM_BIT_ASCII
+    ||  type == PNM_BIT_BINARY) {
+        r += fprintf(f, "%d %d\n", w, h);
     } else {
-        for (int i = 0; i < w*h*3; i++) {
-            fprintf(f, "%c", b[i]);
-        }
+        r += fprintf(f, "%d %d %d\n", w, h, intensity);
+    }
+
+    switch (type) {
+        case PNM_BIT_ASCII:  r += write_pnm_bit_ascii_data   (f, b, w, h);
+        case PNM_GRE_ASCII:  r += write_pnm_gray_ascii_data  (f, b, w, h);
+        case PNM_PIX_ASCII:  r += write_pnm_pix_ascii_data   (f, b, w, h);
+        case PNM_BIT_BINARY: r += write_pnm_bit_binary_data  (f, b, w, h);
+        case PNM_GRE_BINARY: r += write_pnm_gray_binary_data (f, b, w, h);
+        case PNM_PIX_BINARY: r += write_pnm_pix_binary_data  (f, b, w, h);
     }
 
     return r;

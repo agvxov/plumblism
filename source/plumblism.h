@@ -26,12 +26,16 @@ enum {
     PFM_GREYSCALE = 17, /* f */
 };
 
+/* NOTE:
+ *  the order is significant,
+ *  because it corresponds to the mime
+ */
 enum {
-    PNM_BIT_ASCII  = 1,
-    PNM_BIT_BINARY,
+    PNM_BIT_ASCII = 1,
     PNM_GRE_ASCII,
-    PNM_GRE_BINARY,
     PNM_PIX_ASCII,
+    PNM_BIT_BINARY,
+    PNM_GRE_BINARY,
     PNM_PIX_BINARY,
 };
 
@@ -43,12 +47,8 @@ int get_pnm_type(FILE * f);
 
 // XXX is_ascii makes no sense
 int read_pnm_header(FILE * f, int * w, int * h, int * intensity, int * is_ascii, int type);
-
 int read_pnm_data(FILE * f, int * b, int type);
-
-int write_pbm_file(FILE * f, const int * b, int w, int h, int is_ascii);
-int write_pgm_file(FILE * f, const int * b, int w, int h, int intensity, int is_ascii);
-int write_ppm_file(FILE * f, const int * b, int w, int h, int intensity, int is_ascii);
+int write_pnm_file(FILE * f, const int * b, int w, int h, int intensity, int type);
 
 /* PFM API */
 int read_pfm_header(FILE * f, int * w, int * h, int * img_type, int * endianess);

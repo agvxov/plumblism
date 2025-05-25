@@ -30,7 +30,7 @@ signed main(void) {
 
     FILE * f2 = fopen("test_out.pbm", "w");
 
-    write_pbm_file(f2, buffer, w, h, is_ascii);
+    write_pnm_file(f2, buffer, w, h, 0, is_ascii);
 
     fclose(f);
     fclose(f2);
