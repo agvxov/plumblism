@@ -39,7 +39,7 @@ pnm_type_t get_pnm_type(FILE * f) {
  
     if (magic[0] != 'P') { return -1; }
 
-    return magic[1] - '1';
+    return magic[1] - '0';
 }
 
 // --- Lexers
