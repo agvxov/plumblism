@@ -207,7 +207,8 @@ static inline
 int read_pnm_gray_binary_data(FILE * f, int * b) {
     int r = 0;
 
-    while (!feof(f)) { b[r++] = fgetc(f); }
+    int c;
+    while ((c = fgetc(f)) != EOF) { b[r++] = c; }
 
     return r;
 }
