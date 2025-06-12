@@ -243,7 +243,7 @@ int write_pnm_bit_ascii_data(FILE * f, const int * b, int w, int h) {
     int r = 0;
 
     for (int i = 0; i < w*h; i++) {
-        r += fprintf(f, "%d", b[i]);
+        r += fprintf(f, "%d ", b[i]);
         if ((i + 1) % w == 0) {
             r += fputc('\n', f);
         }
