@@ -30,6 +30,7 @@ Consult it for documentation.
 ## Compiling
 * Plumblism has no dependencies
 * Plumblism is standard C99
+* Plumblism is C++ compatible
 * a classic UNIX tool-chain is required
 
 Invoking `make` will produce both a static and dynamic library.
