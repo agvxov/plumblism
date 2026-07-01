@@ -46,7 +46,8 @@ pnm_type_t get_pnm_type(FILE * f) {
 static
 int lex_header(FILE * f) {
     int r;
-    char digit_buffer[12];
+    const int digit_buffer_size = 12;
+    char digit_buffer[digit_buffer_size];
     int digit_buffer_empty_top = 0;
 
     state_t state = INITIAL;
@@ -59,7 +60,7 @@ int lex_header(FILE * f) {
                 switch (c) {
                     case DIGIT: {
                         BEGIN(IN_NUMBER);
-                        digit_buffer[digit_buffer_empty_top++] = c;
+                        goto digit;
                     } break;
                     case '#': BEGIN(IN_COMMENT); break;
                     case WS: { ; } break;
@@ -70,7 +71,11 @@ int lex_header(FILE * f) {
             case IN_NUMBER: {
                 switch (c) {
                     case DIGIT: {
+                      digit:
                         digit_buffer[digit_buffer_empty_top++] = c;
+                        if (digit_buffer_empty_top == digit_buffer_size) {
+                            return -2;
+                        }
                     } break;
                     case WS: {
                         DIGIT_BUFFER_TO_INT(digit_buffer, digit_buffer_empty_top, r);
