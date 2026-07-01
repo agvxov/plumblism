@@ -14,6 +14,7 @@ randimg:
 	./randimg.out --ascii --o random.out.pgm
 
 test:
+	${CXX} -o test.out test/test.cpp source/plumblism.c -Isource -std=c++23
 	${CC} -o test.out test/test.c source/plumblism.c -Isource -ldictate -std=c23 -ggdb -fsanitize=address
 	./test.out
 	cat test.out.pbm

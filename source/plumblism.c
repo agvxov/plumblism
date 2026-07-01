@@ -37,9 +37,9 @@ pnm_type_t get_pnm_type(FILE * f) {
     magic[0] = fgetc(f);
     magic[1] = fgetc(f);
  
-    if (magic[0] != 'P') { return -1; }
+    if (magic[0] != 'P') { return PNM_FORMAT_ERROR; }
 
-    return magic[1] - '0';
+    return (pnm_type_t)(magic[1] - '0'); // c++ism
 }
 
 // --- Lexers
