@@ -6,14 +6,13 @@ extern int lex_header(FILE * f);
 
 signed main(void) {
     int e;
-    //FILE * f = fopen("/home/anon/Documents/figure_1.pbm", "r");
     FILE * f = fopen("test/test.pbm", "r");
     if (!f) { return 1; }
 
     int w, h;
     e = read_pnm_header(f, PNM_BIT_ASCII, &w, &h, NULL);
 
-    if (e == -1) { return 1; }
+    if (e < 1) { return 1; }
 
     int * buffer = (int*)malloc(e * sizeof(int));
 
