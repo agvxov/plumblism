@@ -150,7 +150,7 @@ int read_pnm_header(FILE * f, pnm_type_t type, int * w, int * h, int * intensity
     if (h        ) { *h         = h_        ; }
     if (intensity) { *intensity = intensity_; }
 
-    return (*w) * (*h) * sizeof(int);
+    return w_ * h_ * sizeof(int);
 }
 
 static
