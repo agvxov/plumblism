@@ -164,9 +164,11 @@ int read_pnm_header(FILE * f, pnm_type_t type, int * w, int * h, int * intensity
         case PNM_GRE_ASCII:
         case PNM_GRE_BINARY:
             bytes_per_pixel = 1;
+            break;
         case PNM_PIX_ASCII:
         case PNM_PIX_BINARY:
             bytes_per_pixel = 3;
+            break;
     }
   #pragma GCC diagnostic pop
 
