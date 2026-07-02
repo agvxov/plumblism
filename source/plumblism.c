@@ -155,7 +155,7 @@ int read_pnm_header(FILE * f, pnm_type_t type, int * w, int * h, int * intensity
     if (h        ) { *h         = h_        ; }
     if (intensity) { *intensity = intensity_; }
 
-    int bytes_per_pixel;
+    int bytes_per_pixel = 0;
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wswitch"
     switch (type) {
