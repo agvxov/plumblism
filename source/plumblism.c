@@ -44,7 +44,7 @@ pnm_type_t get_pnm_type(FILE * f) {
 
 // --- Lexers
 static
-int lex_header(FILE * f) {
+int lex_header_field_co(FILE * f) {
     int r;
     const int digit_buffer_size = 12;
     char digit_buffer[digit_buffer_size];
@@ -141,13 +141,13 @@ int read_pnm_header(FILE * f, pnm_type_t type, int * w, int * h, int * intensity
     fgetc(f);
     fgetc(f);
 
-    w_ = lex_header(f); if (w_ == -1) { return -1; }
-    h_ = lex_header(f); if (h_ == -1) { return -1; }
+    w_ = lex_header_field_co(f); if (w_ == -1) { return -1; }
+    h_ = lex_header_field_co(f); if (h_ == -1) { return -1; }
     if (type == PNM_BIT_ASCII
     ||  type == PNM_BIT_BINARY) {
         intensity_ = 1;
     } else {
-        intensity_ = lex_header(f);
+        intensity_ = lex_header_field_co(f);
         if (intensity_ == -1) { return -1; }
     }
 
