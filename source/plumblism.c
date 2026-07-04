@@ -15,13 +15,17 @@ typedef enum {
               case '1': case '2': case '3': case '4': \
               case '5': case '6': case '7': case '8': \
               case '9'
-#define WS    ' ': case '\t': case '\n': case '\v': case '\f': case '\r'
+#define WSNL  ' ': case '\t': case '\n': case '\v': case '\f': case '\r'
 #define BEGIN(s) state = s
-#define DIGIT_BUFFER_TO_INT(b, n, r) \
-  r = 0;                             \
-  for (int i = 0; i < n; i++) {      \
-      r = r * 10 + (b[i] - '0');     \
-  }
+#define DIGIT_BUFFER_TO_INT(buffer, buffer_size, r) do {\
+    r = 0;                                              \
+    for (int i = 0; i < buffer_size; i++) {             \
+        r = r * 10 + (buffer[i] - '0');                 \
+    }                                                   \
+    buffer_size = 0;                                    \
+} while (0)
+
+static const int digit_buffer_size = 12;
 
 
 // NOTE: 
@@ -46,7 +50,6 @@ pnm_type_t get_pnm_type(FILE * f) {
 static
 int lex_header_field_co(FILE * f) {
     int r;
-    const int digit_buffer_size = 12;
     char digit_buffer[digit_buffer_size];
     int digit_buffer_empty_top = 0;
 
@@ -63,7 +66,7 @@ int lex_header_field_co(FILE * f) {
                         goto digit;
                     } break;
                     case '#': BEGIN(IN_COMMENT); break;
-                    case WS: { ; } break;
+                    case WSNL: { ; } break;
                     default: return -1;
                 }
             } break;
@@ -77,7 +80,7 @@ int lex_header_field_co(FILE * f) {
                             return -2;
                         }
                     } break;
-                    case WS: {
+                    case WSNL: {
                         DIGIT_BUFFER_TO_INT(digit_buffer, digit_buffer_empty_top, r);
                     } return r;
                     default: return -1;
@@ -99,7 +102,7 @@ int lex_data(FILE * f, int * b) {
 
     int c;
     state_t state = INITIAL;
-    char digit_buffer[12];
+    char digit_buffer[digit_buffer_size];
     int digit_buffer_empty_top = 0;
     while ((c = fgetc(f)) != EOF) {
       #pragma GCC diagnostic push
@@ -109,9 +112,12 @@ int lex_data(FILE * f, int * b) {
                 switch (c) {
                     case DIGIT: {
                         digit_buffer[digit_buffer_empty_top++] = c;
+                        if (digit_buffer_empty_top == digit_buffer_size) {
+                            return -2;
+                        }
                     } break;
 
-                    case WS: {
+                    case WSNL: {
                         int i;
                         DIGIT_BUFFER_TO_INT(digit_buffer, digit_buffer_empty_top, i);
                         b[r++] = i;
@@ -190,7 +196,7 @@ int read_pnm_bit_ascii_data(FILE * f, int * b) {
                     case '0': case '1': {
                         b[r++] = c - '0';
                     } break;
-                    case WS: { ; } break;
+                    case WSNL: { ; } break;
                     case '#': { BEGIN(IN_COMMENT); } break;
                     default: return -1;
                 }
