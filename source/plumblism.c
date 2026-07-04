@@ -19,8 +19,8 @@ typedef enum {
 #define BEGIN(s) state = s
 #define DIGIT_BUFFER_TO_INT(buffer, buffer_size, r) do {\
     r = 0;                                              \
-    for (int i = 0; i < buffer_size; i++) {             \
-        r = r * 10 + (buffer[i] - '0');                 \
+    for (int i_ = 0; i_ < buffer_size; i_++) {          \
+        r = r * 10 + (buffer[i_] - '0');                \
     }                                                   \
     buffer_size = 0;                                    \
 } while (0)
