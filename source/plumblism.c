@@ -325,7 +325,7 @@ int write_pnm_pix_ascii_data(FILE * f, const int * b, int w, int h) {
         );
         b += 3;
         if ((i + 1) % w == 0) {
-            fprintf(f, "\n");
+            r += fprintf(f, "\n");
         }
     }
 
