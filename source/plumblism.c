@@ -244,7 +244,7 @@ int read_pnm_gray_binary_data(FILE * f, int * b) {
 static
 int read_pnm_pix_ascii_data(FILE * f, int * b) {
     const int i = lex_data(f, b);
-    return (i % 3 == 0 ? i : -1);
+    return (i % 3 == 0 ? i : -2);
 }
 
 static
