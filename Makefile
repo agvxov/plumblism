@@ -1,6 +1,7 @@
 .PHONY: main test test-basic test-criterion
 
-CFLAGS := -Isource/ -std=c99 -Wall -Wpedantic -O2
+CFLAGS := -Isource/ -std=c99 -Wall -Wpedantic -Wextra -O2
+DEBUG  := -ggdb -O0
 
 main: lib randimg test
 
@@ -17,12 +18,12 @@ test: test-basic test-criterion
 
 test-basic:
 	${CXX} -o test.out test/test.cpp source/plumblism.c -Isource -std=c++23
-	${CC} ${CFLAGS} -o test.out test/test.c source/plumblism.c -Isource -ldictate -std=c23 -ggdb -fsanitize=address
+	${CC} ${CFLAGS} ${DEBUG} -o test.out test/test.c source/plumblism.c -Isource -ldictate -std=c23 -fsanitize=address,undefined
 	./test.out
 	cat test.out.pbm
 
 test-criterion:
-	${CC} ${CFLAGS} -o test-criterion.out test/test-criterion.c source/plumblism.c -lcriterion -std=c23
+	${CC} ${CFLAGS} ${DEBUG} -o test-criterion.out test/test-criterion.c source/plumblism.c -lcriterion -std=c23
 	./test-criterion.out
 
 man:
