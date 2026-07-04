@@ -287,7 +287,7 @@ int write_pnm_bit_binary_data(FILE * f, const int * b, int w, int h) {
         for (int h = 0; h < 8; h++) {
             v |= (b[i] << (7-h));
         }
-        r += fputc('0' + v, f);
+        r += fputc(v, f);
     }
 
     return 1;
