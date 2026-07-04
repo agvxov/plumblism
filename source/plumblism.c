@@ -277,7 +277,7 @@ int write_pnm_bit_ascii_data(FILE * f, const int * b, int w, int h) {
     for (int i = 0; i < w*h; i++) {
         r += fprintf(f, "%d ", b[i]);
         if ((i + 1) % w == 0) {
-            r += fputc('\n', f);
+            r += (fputc('\n', f), 1);
         }
     }
 
@@ -293,7 +293,7 @@ int write_pnm_bit_binary_data(FILE * f, const int * b, int w, int h) {
         for (int h = 0; h < 8; h++) {
             v |= (b[i] << (7-h));
         }
-        r += fputc(v, f);
+        r += (fputc(v, f), 1);
     }
 
     return 1;
@@ -308,7 +308,7 @@ static
 int write_pnm_gray_binary_data(FILE * f, const int * b, int w, int h) {
     int r = 0;
 
-    for (int i = 0; i < w*h; i++) { r += fprintf(f, "%c", b[i]); }
+    for (int i = 0; i < w*h; i++) { r += (fputc(b[i], f), 1); }
 
     return r;
 }
@@ -342,7 +342,7 @@ int write_pnm_file(FILE * f, pnm_type_t type, const int * b, int w, int h, int i
 
     char magic[] = "PX";
     magic[1] = '0' + type;
-    r += fputs(magic, f);
+    r += (fputs(magic, f), 2);
 
     if (type == PNM_BIT_ASCII
     ||  type == PNM_BIT_BINARY) {
