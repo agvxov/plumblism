@@ -2,11 +2,9 @@
 #include <dictate.h>
 #include <stdlib.h>
 
-extern int lex_header(FILE * f);
-
 signed main(void) {
     int e;
-    FILE * f = fopen("test/test.pbm", "r");
+    FILE * f = fopen("test/test-hand-ascii.pbm", "r");
     if (!f) { return 1; }
 
     int w, h;
