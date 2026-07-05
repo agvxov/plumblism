@@ -358,6 +358,8 @@ Test(plumblism, write_image_ppm_binary) {
 // -------------------------------
 // -------------------------------
 void rwr_roundtrip_proto(struct test_image_t image) {
+    static char tmpfilename[] = "/tmp/plumblism-XXXXXX";
+
     int * original;
     int * copy;
 
@@ -396,8 +398,11 @@ void rwr_roundtrip_proto(struct test_image_t image) {
     } while (0);
 
     do {
-        FILE * tmp = tmpfile();
-        crex_assert_file_open(tmp, "tmpfile");
+        int fd = mkstemp(tmpfilename);
+        cr_assert_neq(fd, -1);
+
+        FILE * tmp = fdopen(fd, "w+b");
+        crex_assert_file_open(tmp, tmpfilename);
 
         cr_assert(lt(int, 0, write_pnm_file(
             tmp,
