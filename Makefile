@@ -22,8 +22,10 @@ test-basic:
 	./test.out
 	cat test.out.pbm
 
-test-criterion:
+test-criterion.out: test/test-criterion.c source/plumblism.c
 	${CC} ${CFLAGS} ${DEBUG} -o test-criterion.out test/test-criterion.c source/plumblism.c -lcriterion -std=c23
+
+test-criterion: test-criterion.out
 	./test-criterion.out
 
 man:
