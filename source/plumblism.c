@@ -268,10 +268,10 @@ static
 int write_pnm_bit_binary_data(FILE * f, const int * b, int w, int h) {
     int r = 0;
 
-    for (int i = 0; i < w*h; i++) {
+    for (int i = 0; i < w*h; i += 8) {
         int v = 0;
         for (int h = 0; h < 8; h++) {
-            v |= (b[i] << (7-h));
+            v |= (b[i+h] << (7-h));
         }
         r += (fputc(v, f), 1);
     }
