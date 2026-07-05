@@ -105,7 +105,7 @@ int lex_data(FILE * f, int * b, int size) {
     char digit_buffer[digit_buffer_size];
     int digit_buffer_empty_top = 0;
     while ((c = fgetc(f)) != EOF) {
-        if (r > size) { break; }
+        if (r >= size) { break; }
       #pragma GCC diagnostic push
       #pragma GCC diagnostic ignored "-Wswitch"
         switch (state) {
@@ -189,7 +189,7 @@ int read_pnm_bit_ascii_data(FILE * f, int * b, int size) {
     int c;
     state_t state = INITIAL;
     while ((c = fgetc(f)) != EOF) {
-        if (r > size) { break; }
+        if (r >= size) { break; }
       #pragma GCC diagnostic push
       #pragma GCC diagnostic ignored "-Wswitch"
         switch (state) {
@@ -221,7 +221,7 @@ int read_pnm_bit_binary_data(FILE * f, int * b, int size) {
     int c;
     while ((c = fgetc(f)) != EOF) {
         for (int i = 0; i < 8; i++) {
-            if (r > size) { break; }
+            if (r >= size) { break; }
             b[r++] = (c >> (7-i)) & 0x1;
         }
     }
@@ -240,7 +240,7 @@ int read_pnm_gray_binary_data(FILE * f, int * b, int size) {
 
     int c;
     while ((c = fgetc(f)) != EOF) {
-        if (r > size) { break; }
+        if (r >= size) { break; }
         b[r++] = c;
     }
 
