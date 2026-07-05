@@ -11,6 +11,9 @@
 #include <limits.h>
 #include <sys/stat.h>
 
+#define DIFFHEX_IMPLEMENTATION
+#include "diffhex.h"
+
 constexpr size_t N_TEST_IMAGES = 9;
 struct test_image_t {
     const char * name;
@@ -438,6 +441,9 @@ void rwr_roundtrip_proto(struct test_image_t image) {
 
     if (size == size2
     &&  memcmp(original, copy, size)) {
+        //auto opts = diffhex_defaults;
+        //opts.do_collapse_identical = true;
+        //diffhex(original, size, copy, size2, opts);
         printf(
             "Mismatch: '%s' VS '%s'\n",
             image.name,
