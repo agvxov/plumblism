@@ -302,7 +302,7 @@ int write_pnm_bit_binary_data(FILE * f, const int * b, int w, int h) {
         r += (fputc(v, f), 1);
     }
 
-    return 1;
+    return r;
 }
 
 static
