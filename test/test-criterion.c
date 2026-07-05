@@ -408,8 +408,6 @@ void rwr_roundtrip_proto(struct test_image_t image) {
             maxval
         )));
 
-        rewind(tmp);
-
         size2 = read_pnm_header(
             tmp,
             image.type,
