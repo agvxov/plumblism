@@ -201,7 +201,7 @@ void test_read_image_proto(struct test_image_t image) {
         NULL,
         NULL
     );
-    cr_assert(size > 0);
+    cr_assert(lt(int, 0, size));
 
     int * buffer = malloc(size * sizeof(int));
     cr_assert_not_null(buffer);
@@ -209,7 +209,8 @@ void test_read_image_proto(struct test_image_t image) {
     cr_assert(lt(int, 0, read_pnm_data(
         f,
         image.type,
-        buffer
+        buffer,
+        size
     )));
 
     free(buffer);
@@ -387,7 +388,8 @@ void rwr_roundtrip_proto(struct test_image_t image) {
         cr_assert(lt(int, 0, read_pnm_data(
             in,
             image.type,
-            original
+            original,
+            size
         )));
 
         fclose(in);
@@ -419,7 +421,8 @@ void rwr_roundtrip_proto(struct test_image_t image) {
         cr_assert(lt(int, 0, read_pnm_data(
             tmp,
             image.type,
-            copy
+            copy,
+            size2
         )));
 
         fclose(tmp);

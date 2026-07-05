@@ -97,7 +97,7 @@ int lex_header_field_co(FILE * f) {
 }
 
 static
-int lex_data(FILE * f, int * b) {
+int lex_data(FILE * f, int * b, int size) {
     int r = 0;
 
     int c;
@@ -105,6 +105,7 @@ int lex_data(FILE * f, int * b) {
     char digit_buffer[digit_buffer_size];
     int digit_buffer_empty_top = 0;
     while ((c = fgetc(f)) != EOF) {
+        if (r > size) { break; }
       #pragma GCC diagnostic push
       #pragma GCC diagnostic ignored "-Wswitch"
         switch (state) {
@@ -182,12 +183,13 @@ int read_pnm_header(FILE * f, pnm_type_t type, int * w, int * h, int * intensity
 }
 
 static
-int read_pnm_bit_ascii_data(FILE * f, int * b) {
+int read_pnm_bit_ascii_data(FILE * f, int * b, int size) {
     int r = 0;
 
     int c;
     state_t state = INITIAL;
     while ((c = fgetc(f)) != EOF) {
+        if (r > size) { break; }
       #pragma GCC diagnostic push
       #pragma GCC diagnostic ignored "-Wswitch"
         switch (state) {
@@ -213,12 +215,13 @@ int read_pnm_bit_ascii_data(FILE * f, int * b) {
 }
 
 static
-int read_pnm_bit_binary_data(FILE * f, int * b) {
+int read_pnm_bit_binary_data(FILE * f, int * b, int size) {
     int r = 0;
     
     int c;
     while ((c = fgetc(f)) != EOF) {
         for (int i = 0; i < 8; i++) {
+            if (r > size) { break; }
             b[r++] = (c >> (7-i)) & 0x1;
         }
     }
@@ -227,41 +230,44 @@ int read_pnm_bit_binary_data(FILE * f, int * b) {
 }
 
 static
-int read_pnm_gray_ascii_data(FILE * f, int * b) {
-    return lex_data(f, b);
+int read_pnm_gray_ascii_data(FILE * f, int * b, int size) {
+    return lex_data(f, b, size);
 }
 
 static inline
-int read_pnm_gray_binary_data(FILE * f, int * b) {
+int read_pnm_gray_binary_data(FILE * f, int * b, int size) {
     int r = 0;
 
     int c;
-    while ((c = fgetc(f)) != EOF) { b[r++] = c; }
+    while ((c = fgetc(f)) != EOF) {
+        if (r > size) { break; }
+        b[r++] = c;
+    }
 
     return r;
 }
 
 static
-int read_pnm_pix_ascii_data(FILE * f, int * b) {
-    const int i = lex_data(f, b);
+int read_pnm_pix_ascii_data(FILE * f, int * b, int size) {
+    const int i = lex_data(f, b, size);
     return (i % 3 == 0 ? i : -2);
 }
 
 static
-int read_pnm_pix_binary_data(FILE * f, int * b) {
-    return read_pnm_gray_binary_data(f, b);
+int read_pnm_pix_binary_data(FILE * f, int * b, int size) {
+    return read_pnm_gray_binary_data(f, b, size);
 }
 
-int read_pnm_data(FILE * f, pnm_type_t type, int * b) {
+int read_pnm_data(FILE * f, pnm_type_t type, int * b, int size) {
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wswitch"
     switch (type) {
-        case PNM_BIT_ASCII:  return read_pnm_bit_ascii_data(f, b);
-        case PNM_GRE_ASCII:  return read_pnm_gray_ascii_data(f, b);
-        case PNM_PIX_ASCII:  return read_pnm_pix_ascii_data(f, b);
-        case PNM_BIT_BINARY: return read_pnm_bit_binary_data(f, b);
-        case PNM_GRE_BINARY: return read_pnm_gray_binary_data(f, b);
-        case PNM_PIX_BINARY: return read_pnm_pix_binary_data(f, b);
+        case PNM_BIT_ASCII:  return read_pnm_bit_ascii_data(f, b, size);
+        case PNM_GRE_ASCII:  return read_pnm_gray_ascii_data(f, b, size);
+        case PNM_PIX_ASCII:  return read_pnm_pix_ascii_data(f, b, size);
+        case PNM_BIT_BINARY: return read_pnm_bit_binary_data(f, b, size);
+        case PNM_GRE_BINARY: return read_pnm_gray_binary_data(f, b, size);
+        case PNM_PIX_BINARY: return read_pnm_pix_binary_data(f, b, size);
     }
   #pragma GCC diagnostic pop
 

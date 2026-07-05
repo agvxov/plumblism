@@ -14,7 +14,7 @@ signed main(void) {
 
     int * buffer = (int*)malloc(e * sizeof(int));
 
-    e = read_pnm_data(f, PNM_BIT_ASCII, buffer);
+    e = read_pnm_data(f, PNM_BIT_ASCII, buffer, e);
     if (e < w*h) { return 1; }
 
     for (int i = 0; i < w*h; i++) {
