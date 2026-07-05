@@ -268,7 +268,7 @@ struct { size_t n; const char * s; } test_write_image_proto(pnm_type_t type, int
     cr_assert_neq(fd, -1);
 
     FILE * f = fdopen(fd, "w+b");
-    crex_assert_file_open(f, "tmpfile");
+    crex_assert_file_open(f, filename);
 
     size_t size = write_pnm_file(
         f,
