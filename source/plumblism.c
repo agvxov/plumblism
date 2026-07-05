@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <assert.h>
 
 /* Every problem is a parsing problem, if you hate yourself enough.
  *                                      - Anon; all rights reserved
@@ -48,7 +49,7 @@ pnm_type_t get_pnm_type(FILE * f) {
 
 // --- Lexers
 static
-int lex_header_field_co(FILE * f) {
+int lex_field_co(FILE * f) {
     int r;
     char digit_buffer[digit_buffer_size];
     int digit_buffer_empty_top = 0;
@@ -100,42 +101,12 @@ static
 int lex_data(FILE * f, int * b, int size) {
     int r = 0;
 
-    int c;
-    state_t state = INITIAL;
-    char digit_buffer[digit_buffer_size];
-    int digit_buffer_empty_top = 0;
-    while ((c = fgetc(f)) != EOF) {
+    for (int i = 0; i < size; i++) {
         if (r >= size) { break; }
-      #pragma GCC diagnostic push
-      #pragma GCC diagnostic ignored "-Wswitch"
-        switch (state) {
-            case INITIAL: {
-                switch (c) {
-                    case DIGIT: {
-                        digit_buffer[digit_buffer_empty_top++] = c;
-                        if (digit_buffer_empty_top == digit_buffer_size) {
-                            return -2;
-                        }
-                    } break;
-
-                    case WSNL: {
-                        int i;
-                        DIGIT_BUFFER_TO_INT(digit_buffer, digit_buffer_empty_top, i);
-                        b[r++] = i;
-                    } break;
-
-                    case '#': { BEGIN(IN_COMMENT); } break;
-
-                    default: return -1;
-                }
-            } break;
-            case IN_COMMENT: {
-                if (c == '\n') { BEGIN(INITIAL); }
-            } break;
-        }
-      #pragma GCC diagnostic pop
+        b[r++] = lex_field_co(f);
     }
 
+    assert(r == size);
     return r;
 }
 
@@ -148,13 +119,13 @@ int read_pnm_header(FILE * f, pnm_type_t type, int * w, int * h, int * intensity
     fgetc(f);
     fgetc(f);
 
-    w_ = lex_header_field_co(f); if (w_ == -1) { return -1; }
-    h_ = lex_header_field_co(f); if (h_ == -1) { return -1; }
+    w_ = lex_field_co(f); if (w_ == -1) { return -1; }
+    h_ = lex_field_co(f); if (h_ == -1) { return -1; }
     if (type == PNM_BIT_ASCII
     ||  type == PNM_BIT_BINARY) {
         intensity_ = 1;
     } else {
-        intensity_ = lex_header_field_co(f);
+        intensity_ = lex_field_co(f);
         if (intensity_ == -1) { return -1; }
     }
 
@@ -211,6 +182,7 @@ int read_pnm_bit_ascii_data(FILE * f, int * b, int size) {
       #pragma GCC diagnostic pop
     }
 
+    assert(r == size);
     return r;
 }
 
@@ -226,6 +198,7 @@ int read_pnm_bit_binary_data(FILE * f, int * b, int size) {
         }
     }
 
+    assert(r == size);
     return r;
 }
 
@@ -244,6 +217,7 @@ int read_pnm_gray_binary_data(FILE * f, int * b, int size) {
         b[r++] = c;
     }
 
+    assert(r == size);
     return r;
 }
 
