@@ -436,6 +436,15 @@ void rwr_roundtrip_proto(struct test_image_t image) {
     cr_expect(eq(int, rh, h));
     cr_expect(eq(int, rmax, maxval));
 
+    if (size == size2
+    &&  memcmp(original, copy, size)) {
+        printf(
+            "Mismatch: '%s' VS '%s'\n",
+            image.name,
+            tmpfilename
+        );
+    }
+
     cr_expect_arr_eq(original, copy, size);
 
     free(original);
